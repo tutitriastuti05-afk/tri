@@ -1,0 +1,6 @@
+{
+  "name": "Gelombang Interaktif & Praktikum Sensor",
+  "description": "Media pembelajaran interaktif cepat rambat gelombang yang dilengkapi materi lengkap, simulasi visual, sensor suara untuk praktikum 2 HP, dan kuis beranimasi dengan tema kartun outdoor.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

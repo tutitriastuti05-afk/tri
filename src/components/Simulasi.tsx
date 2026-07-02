@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { Play, Pause, RefreshCw, Zap, Gauge, Eye, Activity } from "lucide-react";
+import { Play, Pause, RefreshCw, Zap, Gauge, Eye, Activity, Plus, Trash2, TrendingUp } from "lucide-react";
 
 export default function Simulasi() {
   const [waveType, setWaveType] = useState<"transversal" | "longitudinal">("transversal");
@@ -9,6 +9,84 @@ export default function Simulasi() {
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   
   const speed = Number((lambda * frequency).toFixed(2)); // v = lambda * f (m/s)
+
+  interface SimTrial {
+    id: number;
+    lambda: number;
+    frequency: number;
+    speed: number;
+    waveType: "transversal" | "longitudinal";
+    timestamp: string;
+  }
+
+  const [simTrials, setSimTrials] = useState<SimTrial[]>(() => {
+    try {
+      const saved = localStorage.getItem("gelombang_pintar_sim_trials");
+      if (saved) {
+        return JSON.parse(saved);
+      }
+      // Prepopulated virtual lab data
+      const defaultSimTrials: SimTrial[] = [
+        {
+          id: 1700000000004,
+          lambda: 3.0,
+          frequency: 2.0,
+          speed: 6.0,
+          waveType: "transversal",
+          timestamp: "09:30 WIB"
+        },
+        {
+          id: 1700000000003,
+          lambda: 4.5,
+          frequency: 1.2,
+          speed: 5.4,
+          waveType: "transversal",
+          timestamp: "09:28 WIB"
+        },
+        {
+          id: 1700000000002,
+          lambda: 5.0,
+          frequency: 4.0,
+          speed: 20.0,
+          waveType: "longitudinal",
+          timestamp: "09:25 WIB"
+        },
+        {
+          id: 1700000000001,
+          lambda: 2.0,
+          frequency: 3.5,
+          speed: 7.0,
+          waveType: "longitudinal",
+          timestamp: "09:22 WIB"
+        }
+      ];
+      localStorage.setItem("gelombang_pintar_sim_trials", JSON.stringify(defaultSimTrials));
+      return defaultSimTrials;
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("gelombang_pintar_sim_trials", JSON.stringify(simTrials));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [simTrials]);
+
+  const handleSaveSimTrial = () => {
+    const newTrial: SimTrial = {
+      id: Date.now(),
+      lambda,
+      frequency,
+      speed,
+      waveType,
+      timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) + " WIB"
+    };
+    setSimTrials((prev) => [newTrial, ...prev]);
+  };
 
   // Animation frame logic for time variable
   const [time, setTime] = useState<number>(0);
@@ -396,7 +474,7 @@ export default function Simulasi() {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-white border-4 border-[#AED6F1] shadow-xl rounded-3xl p-5 space-y-3">
               <h4 className="font-black text-slate-800 flex items-center gap-1.5">
-                <Activity className="w-4.5 h-4.5 text-emerald-500" />
+                <Activity className="w-4.5 h-4.5 text-[#1a5276]" />
                 Bagaimana Menghitungnya?
               </h4>
               <p className="text-xs text-[#546E7A] leading-relaxed font-semibold">
@@ -411,6 +489,13 @@ export default function Simulasi() {
                   v = {speed} m/s
                 </div>
               </div>
+              <button
+                id="btn-save-sim-data"
+                onClick={handleSaveSimTrial}
+                className="w-full py-2 bg-emerald-500 hover:bg-emerald-600 border-b-4 border-emerald-700 text-white font-black rounded-full text-xs transition-all flex items-center justify-center gap-1 shadow-sm mt-1 hover:translate-y-[1px]"
+              >
+                <Plus className="w-3.5 h-3.5" /> Simpan Hasil ke Tabel Simulasi
+              </button>
             </div>
 
             {/* Character bubble commentary */}
@@ -422,6 +507,163 @@ export default function Simulasi() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* NEW: Virtual Table & Graph Grid */}
+      <div className="grid md:grid-cols-2 gap-6 mt-8">
+        {/* Results Plot (Dynamic Graph) */}
+        <div className="bg-white border-4 border-[#A9DFBF] shadow-xl rounded-3xl p-5 space-y-4">
+          <div className="flex justify-between items-center border-b-2 border-dashed border-[#A9DFBF] pb-2">
+            <h3 className="font-black text-[#2E4053] flex items-center gap-2 text-base">
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
+              Grafik Cepat Rambat Simulasi
+            </h3>
+            <span className="text-[10px] bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full text-slate-500 font-bold font-mono">
+              Satuan: m/s
+            </span>
+          </div>
+
+          {simTrials.length === 0 ? (
+            <div className="h-44 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center p-4">
+              <span className="text-3xl mb-1 animate-float">📊</span>
+              <span className="text-xs font-bold text-slate-500">Belum ada data eksperimen.</span>
+            </div>
+          ) : (
+            <div className="h-48 bg-[#EBF5FB]/50 border-2 border-[#AED6F1] rounded-2xl relative p-4 flex flex-col justify-end overflow-hidden">
+              <svg className="w-full h-[85%]" viewBox="0 0 500 120" preserveAspectRatio="none">
+                <g stroke="#cbd5e1" strokeWidth="1" strokeDasharray="5,5">
+                  <line x1="0" y1="30" x2="500" y2="30" />
+                  <line x1="0" y1="60" x2="500" y2="60" />
+                  <line x1="0" y1="90" x2="500" y2="90" />
+                </g>
+
+                {(() => {
+                  const getY = (v: number) => {
+                    const minVal = 0;
+                    const maxVal = 35; // speed max is 6 * 5 = 30 m/s
+                    const norm = (v - minVal) / (maxVal - minVal);
+                    return 110 - norm * 100;
+                  };
+
+                  const getX = (idx: number, total: number) => {
+                    if (total <= 1) return 250;
+                    return 40 + (idx / (total - 1)) * 420;
+                  };
+
+                  const points = simTrials.slice().reverse().map((t, idx) => ({
+                    x: getX(idx, simTrials.length),
+                    y: getY(t.speed),
+                    speed: t.speed,
+                  }));
+
+                  const pathD = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+                  return (
+                    <>
+                      {points.length > 1 && (
+                        <path 
+                          d={pathD} 
+                          fill="none" 
+                          stroke="#10b981" 
+                          strokeWidth="3" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                        />
+                      )}
+                      {points.map((p, idx) => (
+                        <g key={idx} className="cursor-pointer group">
+                          <circle 
+                            cx={p.x} 
+                            cy={p.y} 
+                            r="5" 
+                            fill="#ef4444" 
+                            stroke="#1e293b" 
+                            strokeWidth="2" 
+                          />
+                          <text 
+                            x={p.x} 
+                            y={p.y - 10} 
+                            textAnchor="middle" 
+                            fontSize="9" 
+                            fontWeight="bold" 
+                            fill="#1e293b"
+                          >
+                            {p.speed}
+                          </text>
+                        </g>
+                      ))}
+                    </>
+                  );
+                })()}
+              </svg>
+              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mt-2">
+                <span>Mulai</span>
+                <span>Grafik Kecepatan Rambat Simulasi</span>
+                <span>Akhir</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Results Table */}
+        <div className="bg-white border-4 border-[#F7DC6F] shadow-xl rounded-3xl p-5 space-y-4">
+          <div className="flex justify-between items-center border-b-2 border-dashed border-[#F7DC6F] pb-2">
+            <h3 className="font-black text-[#2E4053] flex items-center gap-2 text-base">
+              <span>📑</span> Tabel Hasil Simulasi
+            </h3>
+            {simTrials.length > 0 && (
+              <button
+                id="btn-clear-sim-trials"
+                onClick={() => {
+                  if (confirm("Apakah kamu yakin ingin menghapus semua data simulasi?")) {
+                    setSimTrials([]);
+                  }
+                }}
+                className="py-1 px-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-full text-[10px] transition-all"
+              >
+                Hapus Semua
+              </button>
+            )}
+          </div>
+
+          {simTrials.length === 0 ? (
+            <p className="text-xs text-slate-500 italic text-center py-4">Belum ada tabel data pengamatan.</p>
+          ) : (
+            <div className="overflow-x-auto max-h-48 overflow-y-auto">
+              <table className="w-full text-left border-collapse border-2 border-[#F7DC6F] rounded-2xl overflow-hidden text-xs">
+                <thead>
+                  <tr className="bg-[#FEF9E7] border-b-2 border-[#F7DC6F] font-extrabold text-[#7D6608] sticky top-0">
+                    <th className="p-2 border-r border-[#F7DC6F]/50">No</th>
+                    <th className="p-2 border-r border-[#F7DC6F]/50">Tipe</th>
+                    <th className="p-2 border-r border-[#F7DC6F]/50">λ (m)</th>
+                    <th className="p-2 border-r border-[#F7DC6F]/50">f (Hz)</th>
+                    <th className="p-2 border-r border-[#F7DC6F]/50">v (m/s)</th>
+                    <th className="p-2">Waktu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {simTrials.map((t, idx) => (
+                    <tr 
+                      key={t.id} 
+                      className="border-b border-[#F7DC6F]/30 bg-white transition-colors hover:bg-slate-50"
+                    >
+                      <td className="p-2 border-r border-[#F7DC6F]/30 font-bold">{simTrials.length - idx}</td>
+                      <td className="p-2 border-r border-[#F7DC6F]/30 font-bold text-slate-600 capitalize">
+                        {t.waveType === "transversal" ? "Transversal 🌊" : "Longitudinal 🪗"}
+                      </td>
+                      <td className="p-2 border-r border-[#F7DC6F]/30 font-mono">{t.lambda} m</td>
+                      <td className="p-2 border-r border-[#F7DC6F]/30 font-mono">{t.frequency} Hz</td>
+                      <td className="p-2 border-r border-[#F7DC6F]/30 font-mono font-extrabold text-slate-800">
+                        {t.speed} m/s
+                      </td>
+                      <td className="p-2 font-mono text-slate-500">{t.timestamp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

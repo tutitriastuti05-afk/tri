@@ -616,9 +616,10 @@ export default function Praktikum() {
       doc.setFontSize(9);
       doc.text("No", 18, currentY + 5);
       doc.text("Metode", 28, currentY + 5);
-      doc.text("Jarak Lintasan (m)", 60, currentY + 5);
-      doc.text("Waktu Tempuh (s)", 100, currentY + 5);
-      doc.text("Cepat Rambat (m/s)", 140, currentY + 5);
+      doc.text("Jarak (m)", 60, currentY + 5);
+      doc.text("Waktu (s)", 90, currentY + 5);
+      doc.text("v Ukur (m/s)", 120, currentY + 5);
+      doc.text("v Teori (m/s)", 150, currentY + 5);
       doc.text("Galat (%)", 175, currentY + 5);
 
       doc.setFont("helvetica", "normal");
@@ -636,10 +637,13 @@ export default function Praktikum() {
           doc.text((trials.length - index).toString(), 18, currentY + 5);
           doc.text(t.mode === "1hp" ? "Gema (1 HP)" : "Kompak (2 HP)", 28, currentY + 5);
           doc.text(t.mode === "1hp" ? `${t.distance} x 2` : `${t.distance} m`, 60, currentY + 5);
-          doc.text(`${t.time} s`, 100, currentY + 5);
+          doc.text(`${t.time} s`, 90, currentY + 5);
           doc.setFont("helvetica", "bold");
-          doc.text(`${t.speed} m/s`, 140, currentY + 5);
+          doc.text(`${t.speed} m/s`, 120, currentY + 5);
+          doc.setFont("helvetica", "normal");
+          doc.text("343 m/s", 150, currentY + 5);
           const galatPercent = t.speed > 0 ? `${Math.abs(((t.speed - 343) / 343) * 100).toFixed(1)}%` : "0.0%";
+          doc.setFont("helvetica", "bold");
           doc.text(galatPercent, 175, currentY + 5);
           doc.setFont("helvetica", "normal");
         });
@@ -1282,7 +1286,8 @@ export default function Praktikum() {
                       <th className="p-2.5 border-r border-[#F7DC6F]/50">Metode</th>
                       <th className="p-2.5 border-r border-[#F7DC6F]/50">Jarak (m)</th>
                       <th className="p-2.5 border-r border-[#F7DC6F]/50">Waktu Tempuh (s)</th>
-                      <th className="p-2.5 border-r border-[#F7DC6F]/50">Cepat Rambat (v)</th>
+                      <th className="p-2.5 border-r border-[#F7DC6F]/50">v Ukur (m/s)</th>
+                      <th className="p-2.5 border-r border-[#F7DC6F]/50">v Teori (m/s)</th>
                       <th className="p-2.5 border-r border-[#F7DC6F]/50">Galat (%)</th>
                       <th className="p-2.5">Waktu Ambil</th>
                     </tr>
@@ -1303,6 +1308,9 @@ export default function Praktikum() {
                         <td className="p-2.5 border-r border-[#F7DC6F]/30 font-mono">{t.time} s</td>
                         <td className="p-2.5 border-r border-[#F7DC6F]/30 font-mono font-extrabold text-slate-800">
                           {t.speed} m/s
+                        </td>
+                        <td className="p-2.5 border-r border-[#F7DC6F]/30 font-mono text-slate-600 font-bold">
+                          343 m/s
                         </td>
                         <td className="p-2.5 border-r border-[#F7DC6F]/30 font-mono font-bold text-rose-600">
                           {t.speed > 0 ? `${Math.abs(((t.speed - 343) / 343) * 100).toFixed(1)}%` : "0.0%"}
@@ -1356,7 +1364,8 @@ export default function Praktikum() {
               <th className="p-2 border-r border-slate-950">Metode</th>
               <th className="p-2 border-r border-slate-950">Jarak Lintasan (m)</th>
               <th className="p-2 border-r border-slate-950">Waktu Tempuh (s)</th>
-              <th className="p-2 border-r border-slate-950">Cepat Rambat (m/s)</th>
+              <th className="p-2 border-r border-slate-950">v Ukur (m/s)</th>
+              <th className="p-2 border-r border-slate-950">v Teori (m/s)</th>
               <th className="p-2">Galat (%)</th>
             </tr>
           </thead>
@@ -1368,12 +1377,13 @@ export default function Praktikum() {
                 <td className="p-2 border-r border-slate-950 font-mono">{t.mode === "1hp" ? `${t.distance} × 2` : t.distance}</td>
                 <td className="p-2 border-r border-slate-950 font-mono">{t.time}</td>
                 <td className="p-2 border-r border-slate-950 font-mono font-extrabold">{t.speed} m/s</td>
+                <td className="p-2 border-r border-slate-950 font-mono">343 m/s</td>
                 <td className="p-2 font-mono">{t.speed > 0 ? `${Math.abs(((t.speed - 343) / 343) * 100).toFixed(1)}%` : "0.0%"}</td>
               </tr>
             ))}
             {trials.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-xs italic">Tidak ada data hasil pengamatan yang dicetak.</td>
+                <td colSpan={7} className="p-8 text-center text-xs italic">Tidak ada data hasil pengamatan yang dicetak.</td>
               </tr>
             )}
           </tbody>
